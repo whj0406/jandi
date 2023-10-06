@@ -1,0 +1,48 @@
+#데이터분석
+  import csv
+
+file = open('exam_1006_01.csv', 'r' , encoding='utf-8')
+
+data = csv.reader(file)
+header = next(data)
+
+max_data = []
+min_data = []
+x_data = []
+
+
+
+for line in data:
+    if len(line) == 11:
+        date = line[2].split('-')
+        
+        
+        year = date[0]
+        month = date[1]
+        day = date[2]
+       
+    
+        if month == '10' and day == '01':
+
+            max_temp = float(line[5])
+            min_temp = float(line[8])
+
+
+
+
+
+            max_data.append(max_temp)
+            min_data.append(min_temp)
+            x_data.append(year)
+
+            
+            
+max_data = list(reversed(max_data))
+max_data = list(reversed(min_data))
+max_data = list(reversed(x_data))
+            
+            
+
+print(max_data)
+print(min_data)
+print(x_data)
