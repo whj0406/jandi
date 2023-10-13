@@ -1,0 +1,35 @@
+import csv
+import matplotlib.pyplot as plt
+
+def get_temp_data():
+    csv_file = open('extremum_20231013100856.csv', 'r', encoding='utf-8')
+    data = csv.reader(csv_file)
+    header = next(data)
+
+    temp_data = []
+
+    for line in data:
+        print(len(line))
+        temp = line[5]
+        if temp != '':
+            # print(float(temp))
+            temp_data.append(float(temp))
+
+    return temp_data
+
+def display_chart(data):
+    # plt.rc('font', family='Malgun Gothic')
+    # plt.rc('axes', unicode_minus=False)
+    #
+    # plt.title('년도별 온도')
+
+    plt.plot(data)
+    plt.show()
+
+
+def display_boxplot():
+
+    data = [1, 2, 3, 5, 8, 10, 15, 30]
+
+    plt.boxplot(data)
+    plt.show()
