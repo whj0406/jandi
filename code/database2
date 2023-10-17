@@ -1,0 +1,554 @@
+
+ 학년이 같은 경우에는 이름을 기준으로 2차 내림차순 정렬하여 검색하시오.
+ */
+ SELECT *
+   FROM 학생
+  ORDER BY 학년 ASC, 이름 DESC;
+  
+ /*
+ 집계함수 COUNT( ), MAX( ), MIN( ), SUM( ), AVG( )
+ */
+ -- 전체학생수를 검색하시오.
+ SELECT COUNT(*)
+   FROM 학생;
+ SELECT COUNT(학번)
+   FROM 학생;
+ SELECT COUNT(*) AS 학생수1, COUNT(주소) AS 학생수2, COUNT(distinct 주소) AS 학생수3
+   FROM 학생;
+
+-- 여학생의 평균 나이를 검색하시오.   
+ SELECT COUNT(*)
+   FROM 학생
+  WHERE 성별='여';
+   
+ /*
+ GROUP BY
+ */
+ -- 전체 학생의 성별 최고 나이와 최저 나이를 검색하시오.
+ SELECT 성별, MAX(나이) AS '최고나이', MIN(나이) AS '최저 나이'
+   FROM 학생
+  GROUP BY 성별;
+   
+ SELECT 나이, COUNT(*) AS '나이별 학생수'
+   FROM 학생
+  WHERE 나이>=20 AND 나이 <30
+  GROUP BY 나이;
+  
+  
+  
+  /*
+  HAVING절은 그룹이 만족해야 하는 제한 조건을 명세
+  */
+ SELECT 학년, COUNT(*) AS '학년별 학생수'
+   FROM 학생
+  GROUP BY 학년
+ HAVING COUNT(*) >= 2
+  ;
+  
+ -- 이씨 성을 가진 학생들의 학번과 학생 이름을 검색하시오.
+ SELECT 학번, 이름
+   FROM 학생
+  WHERE 이름 LIKE '이__';
+ 
+ -- 주소지가 '서울'인 학생의 이름, 주소, 학년을 학년 순(내림차순)으로 검색하시오.
+ SELECT 이름, 주소, 학년
+   FROM 학생
+  WHERE 주소 LIKE '%서울%'
+  ORDER BY 학년 DESC;
+  
+ -- 휴대폰번호가 등록되지 않은(널 값을 갖는) 학생의 이름과 휴대폰번호를 검색하시오.
+ SELECT 이름, 휴대폰번호
+   FROM 학생
+  WHERE 휴대폰번호 IS NULL;  
+  
+-- 학생테이블에 여학생이거나 수강테이블에 A학점을 받은 학생의 학번을 검색하시오.
+ SELECT 학번
+   FROM 학생
+  WHERE 성별 = '여'
+ UNION
+ SELECT 학번
+   FROM 수강
+  WHERE 평가학점 = 'A';  
+  
+/* 부 질의문(subquery) */
+-- IN연산자 : 과목번호가 'C002'인 과목을 수강한 학생의 이름을 검색하시오.
+SELECT 이름
+  FROM 학생
+ WHERE 학번 IN ('s001','s003','s004');
+ 
+ SELECT 이름
+  FROM 학생
+ WHERE 학번 IN ( SELECT 학번 
+				  FROM 수강
+				 WHERE 과목번호 = 'c002'
+ 				);
+ 
+ --  중첩 부 질의문
+ -- '정보보호'과목을 수강한 학생의 이름을 검색하시오.
+SELECT 이름
+  FROM 학생
+ WHERE 학번 IN ( SELECT 학번 
+				  FROM 수강
+				 WHERE 과목번호 = (SELECT 과목번호
+                                  FROM 과목
+								 WHERE 이름 = '정보보호')
+ 				);
+ 
+ -- EXISTS 연산사
+ -- 과목번호가 'c002'인 과목을 수강한 학생이 이름을 검색하시오. 
+ -- 대소문자 구분 안함, 부 질의문에 테이블 생략가능한 경우 확인
+ SELECT 이름
+   FROM 학생
+ WHERE EXISTS ( SELECT * 
+				  FROM 수강
+				 WHERE 수강.학번 = 학생.학번
+                   AND 수강.과목번호 = 'c002'
+ 				);
+  
+/*
+조인 검색은 둘 이상의 테이블로부터 
+연관된 행들의 결합을 통해서 검색 결과를 생성
+
+‘조인_조건식’ 없이 이루어진 조인
+관계 대수의 카티션 프로덕트 연산을 적용한 결과(두 테이블을 곱한 결과)를 반환
+대부분의 행이 의미 없는 기계적인 결합임
+*/
+-- 크로스 조인(CROSS JOIN)
+SELECT *
+  FROM 학생, 수강;
+
+SELECT *
+  FROM 학생 CROSS JOIN 수강;
+  
+-- 동등 조인  
+-- 전체 학생의 기본 정보와 모든 수강 정보를 검색하시오. 
+-- (1=1 는 무조건 TRUE로 의미없음, 생략가능 : 뒤에 AND 제거필요)
+SELECT *
+  FROM 학생, 수강
+ WHERE 1=1
+   AND 학생.학번 = 수강.학번;
+   
+SELECT *
+  FROM 학생 JOIN 수강 ON 학생.학번 = 수강.학번   ;
+  
+
+/*
+학생 중에서 과목번호가 'c002'인 과목을 수강한 학생의
+학번과 이름, 과목번호 그리고 변환중간성적(학생별 중간 성적의 10%가산점수)을 검색하시오.
+*/
+SELECT 학생.학번, 이름, 과목번호, 중간성적+(중간성적*0.1) AS 변환중간성적
+  FROM 학생, 수강
+ WHERE 학생.학번=수강.학번 AND 과목번호='c002';
+ 
+SELECT 학생.학번, 이름, 과목번호, 중간성적+(중간성적*0.1) AS 변환중간성적
+  FROM 학생 JOIN 수강 ON 학생.학번=수강.학번
+ WHERE 과목번호='c002'; 
+ 
+-- 학생 중에서 '정보보호' 과목을 수강한 학생이 학번과 이름, 과목번호를 검색하시오.
+SELECT 학생.학번, 학생.이름, 수강.과목번호
+  FROM 학생, 수강, 과목
+ WHERE 학생.학번=수강.학번
+   AND 수강.과목번호=과목.과목번호
+   AND 과목.이름='정보보호'; 
+
+SELECT 학생.학번, 학생.이름, 수강.과목번호   
+  FROM (학생 JOIN 수강 ON 학생.학번=수강.학번) JOIN 과목 ON 수강.과목번호 = 과목.과목번호
+ WHERE 과목.이름='정보보호';    
+ 
+-- 테이블 별칭 사용
+-- 학생 중에서 과목번호가 'c002'인 과목을 수강한 학생의 이름, 과목번호를 검색하시오.
+SELECT 이름, 과목번호
+  FROM 학생 AS S, 수강 E
+ WHERE S.학번=E.학번
+   AND 과목번호='c002';
+
+-- 셀프 조인(self join)
+-- 주소가 같은 학생들의 이름을 쌍으로 검색하시오.
+-- 이때, 검색되는 첫 번째 학생이 두번째 학생보다 학년이 높도록 하시오.
+SELECT S1.이름, S2.이름
+  FROM 학생 S1 JOIN 학생 S2 ON S1.주소=S2.주소
+ WHERE S1.학년>S2.학년;  
+ 
+ -- 외부 조인(outer join)
+ -- 과목을 수강하지 않은 학생을 포함하여 모든 학생의 학번,
+ -- 이름과 학생이 수강한 교과의 평가학저믈 검색하시오.
+ SELECT 학생.학번, 이름, 평가학점
+   FROM 학생 LEFT OUTER JOIN 수강 ON 학생.학번=수강.학번;
+   
+ -- 행삽입 INSERT문
+ /* 학생1 테이블에 학번 'g001', 이름 '김연아2', 주소 '서울 서초', 학년 4, 나이 23, 성별 '여',
+ 휴대폰번호 '010-1111-2222', 소속학과 '컴퓨터'인 학생 정보를 삽입하시오.	*/ 
+ -- 우선 학생1 테이블 생성하시고.
+ CREATE TABLE 학생1
+( 학번 char(4) not null
+, 이름 varchar(20) not null
+, 주소 varchar(50) null DEFAULT '미정'
+, 학년 int not null
+, 나이 int null
+, 성별 char(1) not null
+, 휴대폰번호 char(14) null
+, 소속학과 varchar(20) null
+, primary key (학번) );
+
+-- 데이터를 학생1 테이블에 삽입하세요.
+-- 컬럼 순서가 맞으면 컬럼은 생략할 수 있다.
+desc 학생1; -- 컬럼순서 확인
+INSERT INTO 학생1
+VALUES ('g001','김연아2', '서울 서초', 4, 23, '여', '010-1111-2222','컴퓨터');
+
+INSERT INTO 학생1 (학번, 이름, 주소, 학년, 나이, 성별, 휴대폰번호, 소속학과) 
+VALUES ('g002','김연아3', '서울 서초', 4, 23, '여', '010-1111-2222','컴퓨터');
+
+-- 기본 값 혹은 널 값 입력
+/* 학번 'g002', 이름 '홍길동2', 주소 '미정', 학년 1, 나이 26, 성별 '남', 휴대폰번호 'NULL',
+소속학과 '통계'인 핚생 정보를 삽입하시오.	*/   
+INSERT INTO 학생1(이름, 주소, 학년, 나이, 성별, 휴대폰번호, 소속학과, 학번)
+VALUES ('홍길동2', DEFAULT, 1, 26, '남', NULL, '통계', 'g002');   
+
+-- 학번은 PK는 중복 등록될 수 없으니, 먼저 등록된 값을 삭제함.
+DELETE FROM 학생1
+ WHERE 학번='g002';
+
+INSERT INTO 학생1(이름, 학년, 나이, 성별, 소속학과, 학번)
+VALUES ('홍길동2', 1, 26, '남', '통계', 'g002');  
+
+-- 학번 'g003', 이름 '이승엽2', 주소 '미정', 학년 3, 나이 30, 성별 '남', 휴대폰번호 'NULL', 소속학과 '정보통신'인 학생 정보를 삽입하시오.
+-- 주소 값을 넣지 않으면 기본값으로 '미정'이 등록됨, 휴대폰번호 NULL을 허용함.
+INSERT INTO 학생1(학번, 이름, 학년, 나이, 성별, 소속학과)
+VALUES ('g003','이승엽2',3,30,'남','정보통신');  
+ 
+-- 행 수정 UPDATE문
+-- '이은진' 학생의 학년을 '3'학년으로 수정하시오.
+-- 먼저 이은진 학생의 데이터를 넣자.
+INSERT INTO 학생1(학번, 이름, 학년, 나이, 성별, 소속학과)
+VALUES ('g004','이은진',1,21,'여','정보통신');  
+
+UPDATE 학생1
+   SET 학년=3
+ WHERE 이름='이은진';
+-- 위명령어는 SAFE UPDATE MODE해제 필요, KEY값을 조건절로 하지 않으면 수정/삭제를 제한하는 모드
+-- Error Code: 1175. You are using safe update mode and you tried to update a table without a WHERE that uses a KEY column.  To disable safe mode, toggle the option in Preferences -> SQL Editor and reconnect.	0.000 sec
+-- 아래 명령어를 실행 후 위 UPDATE문 실행하세요.
+SET SQL_SAFE_UPDATES=0; 
+SELECT * FROM 학생1 WHERE 이름='이은진';
+
+-- 모든 학생의 학년을 1씩 증가시키고 소속학과를 '자유전공학부'로 변경하시오.
+SELECT * FROM 학생1;
+
+UPDATE 학생1
+   SET 학년=학년+1, 소속학과='자유전공학부'
+ WHERE 학년=4;
+ 
+SELECT * FROM 학생1;
+
+
+-- 부 질의문을 이용한 수정
+-- 수강 내용이 없는 학생의 소속학과를 널 값으로 수정하시오.
+SELECT * FROM 학생1;
+
+UPDATE 학생1
+   SET 소속학과=NULL
+ WHERE 학번 NOT IN (SELECT 학번
+                     FROM 수강);
+ 
+SELECT * FROM 학생1;
+
+-- 학번이 's003'인 학생의 수강 내용을 '이은진' 학생이 수강한 것으로 수정하시오.
+-- (즉, 수강1 테이블의 학번을 's003' 대신에 '이은진' 학생의 학번으로 변경하시오)
+SELECT * 
+  FROM 학생, 수강
+ WHERE 학생.학번=수강.학번
+   AND 학생.학번 ='s003';
+
+UPDATE 수강
+   SET 학번 = (SELECT 학번
+                FROM 학생
+			   WHERE 이름='이은진')
+ WHERE 학번='s003';
+ 
+SELECT * 
+  FROM 학생, 수강
+ WHERE 학생.학번=수강.학번
+   AND 학생.학번='s003' OR 학생.학번='s007';
+  
+  
+-- 행 삭제 DELETE문
+-- 학생1 테이블에 '송윤아'학생의 모든 정보를 삭제하시오.
+-- 우선, 아래 INSERT문으로 데이터를 등록하시고
+insert into 학생1 values ('s005', '송윤아', '경기 분당', 1, 20, '여', '010-6666-7777', '컴퓨터');
+insert into 학생1 values ('s010', '송윤아', '경기 분당', 2, 21, '여', '010-6666-7778', '컴퓨터');
+insert into 학생1 values ('s011', '송윤아', '경기 분당', 3, 22, '여', '010-6666-7779', '컴퓨터');
+SELECT * FROM 학생1 WHERE 이름='송윤아';   -- 데이터가 들어있는지 확인
+
+DELETE FROM 학생1
+  WHERE 이름='송윤아';
+
+
+-- 3학년 모든 학생 정보를 삭제하시오.
+SELECT * FROM 학생1;
+DELETE FROM 학생1
+ WHERE 학년=3;
+ 
+-- 부 질의문을 이용한 삭제
+-- 수강자가 2명 미만인 과목에 대한 과목 정보를 모두 삭제하시오.
+-- 과목1 테이블 생성
+-- 과목 테이블 생성
+create table 과목1
+( 과목번호 char(4) not null primary key
+, 이름 varchar(20) not null
+, 강의실 char(3) not null
+, 개설학과 varchar(20) not null
+, 시수  int not null ); 
+
+-- 과목 테이블 입력
+insert into 과목1 values ('c001', '데이터베이스', '126', '컴퓨터', 3);
+insert into 과목1 values ('c002', '정보보호', '137', '정보토신', 3);
+insert into 과목1 values ('c003', '모바일웹', '128', '컴퓨터', 3);
+insert into 과목1 values ('c004', '철학개론', '117', '철학', 2);
+insert into 과목1 values ('c005', '정보글쓰기', '120', '교양학부', 1);
+
+SELECT * FROM 과목1; -- 과목1 테이블에 데이터가 존재하는지 확인
+SELECT 과목번호
+          FROM 수강
+		 GROUP BY 과목번호
+		HAVING COUNT(*) < 2; -- 수강자가 2명 미만인 과목번호 확인
+
+-- 수강자가 2명 미만인 과목번호 삭제        
+DELETE FROM 과목1 
+ WHERE 과목번호 IN
+       (SELECT 과목번호
+          FROM 수강
+		 GROUP BY 과목번호
+		HAVING COUNT(*) < 2);
+        
+SELECT * FROM 과목1;  -- 과목수 확인     
+
+
+-- 학생1 테이블의 모든행 삭제
+SELECT * FROM 학생1; -- 데이터가 있는지 확인
+DELETE FROM 학생1; -- 모든 데이터 삭제
+SELECT * FROM 학생1; -- 데이터가 삭제되었는지 확인
+-- 6.1 테이블생성
+-- '과목번호', '이름', '강의실', '개설학과', '시수' 열로 구성된 '과목2' 테이블을 생성하시오. 
+-- '과목번호'를 기본키로 설정하시오.
+-- DROP TABLE 과목2;
+-- DROP TABLE 수강2;
+CREATE TABLE 과목2
+	(과목번호 CHAR(4) NOT NULL PRIMARY KEY,
+	 이름 VARCHAR(20) NOT NULL,
+     강의실 CHAR(5) NOT NULL,
+     개설학과 VARCHAR(20) NOT NULL,
+     시수 INT NOT NULL );
+     
+-- 6.2 학생2 테이블 생성
+CREATE TABLE 학생2
+	(학번 CHAR(4) NOT NULL,
+     이름 VARCHAR(20) NOT NULL,
+     주소 VARCHAR(50) DEFAULT '미정',
+     학년 INT NOT NULL,
+     나이 INT NULL,
+     성별 CHAR(1) NOT NULL,
+     휴대폰번호 CHAR(13) NULL,
+     소속학과 VARCHAR(20) NULL,
+     PRIMARY KEY (학번),
+     UNIQUE (휴대폰번호));
+  
+     
+ -- DESC 명령문 : 테이블 스키마를 확인
+ DESC 학생2;
+ 
+ 
+ -- 수강2 테이블 생성
+ CREATE TABLE 수강2
+	( 학번 CHAR(6) NOT NULL,
+      과목번호 CHAR(4) NOT NULL,
+      신청날짜 DATE NOT NULL,
+	  중간성적 INT NULL DEFAULT 0,
+	  기말성적 INT NULL DEFAULT 0,
+	  평가학점 CHAR(1) NULL,
+      primary key(학번,과목번호),
+	  foreign key(학번) REFERENCES 학생2(학번),
+	  foreign key(과목번호) REFERENCES 과목2(과목번호));
+      
+-- 무결성 제약 조건의 동작 확인
+INSERT INTO 과목2(과목번호, 이름, 강의실, 개설학과)
+VALUES ('c111','DATABASE', A-123, '산업공학'); -- 강의실 타입오류
+
+INSERT INTO 과목2(과목번호, 이름, 강의실, 개설학과)
+VALUES ('c111','DATABASE', 'A-123', '산업공학'); -- 시수 NOT NULL
+
+INSERT INTO 과목2(과목번호, 이름, 강의실, 개설학과, 시수)
+VALUES ('c111','DATABASE', 'A-123', '산업공학', 3); -- 시수 NOT NULL
+
+
+INSERT INTO 학생2(학번, 이름, 학년, 나이, 성별, 휴대폰번호, 소속학과)
+VALUES ('s111', '박태환', 4, null, '남', '010-1111-1111', '산업공학');
+
+INSERT INTO 학생2(학번, 이름, 학년, 나이, 성별, 휴대폰번호, 소속학과)
+VALUES ('s222', '박태환', 2, null, '남', '010-1111-1111', '산업공학');
+-- unique 제약조건 오류 휴대전화번호 중복
+
+INSERT INTO 학생2(학번, 이름, 학년, 나이, 성별, 휴대폰번호, 소속학과)
+VALUES ('s222', '박태환', 2, null, '남', '010-1111-1112', '산업공학'); -- 정상(휴대전화번호 변경)
+
+INSERT INTO 수강2 (학번, 과목번호, 신청날짜)
+VALUES ('s111', 'c111', '2019-12-31');
+SELECT * FROM 학생2;
+DESC 수강2;
+INSERT INTO 수강2 (학번, 과목번호, 신청날짜,중간성적, 기말성적, 평가학점)
+VALUES ('s111', 'c222', '2019-12-31', 93, 98, 'A'); 
+-- 외래키 제약조건 오류 : 과목번호 값이 '과목2'테이블에 존재하지 않음
+/* Error Code: 1452. Cannot add or update a child row: 
+ a foreign key constraint fails 
+ (`univdb`.`수강2`, CONSTRAINT `수강2_ibfk_2` FOREIGN KEY (`과목번호`) REFERENCES `과목2` (`과목번호`))	0.000 sec
+ */
+
+INSERT INTO 수강2 (학번, 과목번호, 신청날짜,중간성적, 기말성적, 평가학점)
+VALUES ('s111', 'c111', '2019-12-31', 93, 98, 'A'); 
+-- Error Code: 1062. Duplicate entry 's111-c111' for key '수강2.PRIMARY'
+-- 기본키 제약조건 위배 : 학번, 과목번호
+
+INSERT INTO 수강2 (학번, 과목번호, 신청날짜,중간성적, 기말성적, 평가학점)
+VALUES ('s222', 'c111', '2019-12-31', 93, 98, 'A'); -- 정상 : 학번 변경
+
+
+-- 테이블 수정 ALTER문
+-- '학생2' 테이블에 새로운 '등록날짜' 열을 추가하시오
+DESC 학생2;
+ALTER TABLE 학생2
+	ADD 등록날짜 DATETIME NOT NULL DEFAULT '2019-12-30';
+    
+SELECT * FROM 학생2;    
+
+-- '학생2' 테이블의 '등록날짜' 열을 삭제하시오.
+ALTER TABLE 학생2
+	DROP COLUMN 등록날짜;
+    
+-- 테이블 삭제 DROP문
+-- '과목2' 테이블을 삭제하시오.
+DROP TABLE 과목2; -- Error Code: 3730. Cannot drop table '과목2' referenced by a foreign key constraint '수강2_ibfk_2' on table '수강2'.
+
+DROP TABLE 수강2; -- 과목2가 참조하는 테이블 수강2를 삭제한다.
+DROP TABLE 과목2;	 -- 과목2 테이블이 정상 삭제된다.
+
+SELECT * FROM 과목2; -- Error Code: 1146. Table 'univdb.과목2' doesn't exist
+DESC 과목2;
+
+-- SQL 데이터 제어문
+-- 계정생성
+CREATE USER 'user1'@'127.1.1.1' IDENTIFIED BY '1111';
+CREATE USER 'user2'@'localhost' IDENTIFIED BY '2222';
+CREATE USER 'user3'@'192.182.10.2' IDENTIFIED BY '3333';
+CREATE USER 'user4'@'%' IDENTIFIED BY '4444';
+
+-- 생성된 사용자를 계정을 확인한다.
+select host, user
+  from mysql.user;
+  
+  
+-- 권한부여
+GRANT INSERT, UPDATE, DELETE ON univDB.* TO 'user1'@'127.1.1.1';
+GRANT ALL ON *.* TO 'user4'@'%' WITH GRANT OPTION;
+GRANT SELECT ON univDB.학생 TO 'user2'@'localhost';
+
+-- 권한 확인
+SHOW GRANTS FOR 'user1'@'127.1.1.1';	-- user1 사용자의 권한 표시  
+show grants;  -- 현재 저복 사용자의 권한 표시
+
+-- 권한 철회 : REVOKE
+revoke DELETE ON univDB.* FROM 'user1'@'127.1.1.1'; -- DELETE 권한이 철회된 것을 확인
+SHOW GRANTS FOR 'user1'@'127.1.1.1';	-- user1 사용자의 권한 표시  
+
+-- 계정 삭제: DROP USER
+DROP USER 'user1'@'127.1.1.1'; 
+-- Error Code: 1141. There is no such grant defined for user 'user1' on host '127.1.1.1'
+
+
+-- 관리자계정 생성
+CREATE USER 'manager'@'%' IDENTIFIED BY '1234';
+GRANT ALL ON *.* TO 'manager'@'%' WITH GRANT OPTION;
+
+SELECT USER();	-- 현재 mysql 사용자 표시
+
+-- 3.2 뷰 생성 
+-- CREATE VIEW 명령문
+
+-- 6-7 3학년 혹은 4학년 학생의 학생이름, 나이, 성, 학년으로 구성된 뷰를 'V1_고학년학생'이라는 이름으로 생성하시오.
+CREATE VIEW V1_고학년학생 (학생이름, 나이, 성, 학년)
+	AS SELECT 이름, 나이, 성별, 학년
+		 FROM 학생
+		WHERE 학년 >= 3 AND 학년 <=4;
+
+-- DROP view V1_고학년학생;
+
+SELECT *
+  FROM V1_고학년학생;
+  
+-- 6-8 각 과목별 과목번호, 강의실, 수강 인원수로 구성된 뷰를 
+--     'V2_과목수강현황'이라는 이름으로 생성하시
+-- 		(과목별로 강의실이 동일하다고 가정한다.)
+CREATE VIEW V2_과목수강현황 (과목번호, 강의실, 수강인원수)
+	AS SELECT 과목.과목번호, 강의실, COUNT(과목.과목번호)
+		 FROM 과목 JOIN 수강 ON 과목.과목번호=수강.과목번호
+		GROUP BY 과목.과목번호;
+
+-- DROP VIEW V2_과목수강현황;        
+
+SELECT *
+  FROM V2_과목수강현황;        
+
+-- 6-9 V1_고학년학생 뷰를 기반으로 여학생만으로 구성된 뷰를 V3_고학년여학생 이름으로 생성하시오.
+
+CREATE VIEW V3_고학년여학생 
+	AS SELECT *
+		 FROM V1_고학년학생
+		WHERE 성='여';
+
+SELECT * FROM V3_고학년여학생;   
+
+
+-- 6-10 생성된 뷰들을 통해 고학년여학생 정보만 검색하시오.
+-- VIEW 1,2 AND TABLE의 결과는 같다.
+
+-- VIEW 1
+SELECT *
+  FROM V1_고학년학생
+ WHERE 성 = '여';
+
+-- VIEW 2 
+SELECT *
+  FROM V3_고학년여학생;
+  
+-- TABLE
+SELECT 이름 AS '학생이름', 나이, 성별 AS '성', 학년
+  FROM 학생
+ WHERE 학년>=3 AND 학년 <= 4 AND 성별 = '여'; 
+  
+-- 6-11 V2_과목수강현황 뷰에서 수강생 인원이 가장 많은 과목과 가장 적은 과목에 대한 
+--      과목번호, 강의실, 수강인원수 정보를 검색하시오.
+SELECT *
+  FROM V2_과목수강현황
+ WHERE 수강인원수 = (SELECT MAX(수강인원수) FROM V2_과목수강현황) or
+	   수강인원수 = (SELECT MIN(수강인원수) FROM V2_과목수강현황);
+       
+-- 3.4 뷰 삭제
+DROP VIEW V1_고학년학생;
+SHOW TABLES; -- TABLE, VIEW 목록조회      
+
+-- 4.2 인덱스 생성
+-- 6-13 수강 테이블의 '학번', '과목번호' 열을 대상으로 인덱스 'idx_수강'을 생성하시오.
+CREATE INDEX idx_수강
+	ON 수강(학번,과목번호);
+    
+SHOW INDEX FROM 수강;
+    
+-- 6-14 과목 테이블의 이름 열을 대상으로 유일한 갑슬 가즌 인덱스 'idx_과목'을 생성하시오.
+CREATE UNIQUE INDEX idx_과목
+	ON 과목(이름 ASC);
+    
+SHOW INDEX FROM 수강;
+
+-- 4.3 인덱스 삭제
+-- 6-15 수강 테이블에 인덱스 'idx_수강'을 삭제하고 '과목' 테이블의 인덱스 'idx_과목'을 삭제하시오.
+DROP INDEX idx_수강 on 수강;
+ALTER TABLE 과목 DROP INDEX idx_과목; 
