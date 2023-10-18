@@ -1,0 +1,27 @@
+package java_test;
+
+import java.util.Scanner;
+
+public class test_3 {
+
+	public static void main(String[] args) {
+
+		
+		Scanner profile = new Scanner(System.in);
+		
+		 String name = profile.nextLine();
+		 int age = profile.nextInt();
+		 long bth = profile.nextLong();
+		 double tall = profile.nextDouble();
+		 String hobby = profile.nextLine();
+		 
+		 
+		 System.out.printf("당신의 입력한 내용은 %s %d %d %.2f %s" , name, age, bth , tall, hobby);
+		 
+		 
+		 
+		
+		
+		 profile.close();
+	}
+}
