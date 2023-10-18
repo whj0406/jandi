@@ -1,0 +1,17 @@
+package java_test;
+
+import java.util.Random;
+
+public class test_2 {
+
+	public static void main(String[] args) {
+
+		Random Wizard = new Random();
+		int attack = Wizard.nextInt(11)+20;
+		System.out.println(""+attack);
+		
+		System.out.printf("마법사가 %d 의 공격력으로 적을 공격했습니다"+attack);
+		
+	}
+
+}
