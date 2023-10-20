@@ -1,0 +1,113 @@
+package homework;
+
+import java.util.Random;
+import java.util.Scanner;
+
+public class Worktest3 {
+
+	public static void main(String[] args) {
+		int ball = 0;// 컴퓨터 ,내가 찬거 공을 넣었는지 유무 확인
+		int comcount = 0; // 컴퓨터가 이긴 횟수
+		int mecount = 0; // 내가 이긴 횟수
+		int game = 0; // 게임 시작 횟수
+		
+		System.out.println("축구 게임을 시작합니다.");
+		Scanner scanner = new Scanner(System.in);
+		Random random = new Random();
+
+		while (true) {
+			System.out.println("내가 공을 찹니다. 어느 쪽으로 차겠습니까?");
+			System.out.println("왼쪽-1, 가운데-2, 오른쪽-3, 게임 끝-4 : ");
+
+			int shot = scanner.nextInt();
+			int computer = random.nextInt(3) + 1;
+
+			if (shot == 1) {
+				System.out.println("왼쪽으로 공을 찼습니다.");
+				ball = 1;
+			} else if (shot == 2) {
+				System.out.println("가운데로 공을 찼습니다.");
+				ball = 2;
+			} else if (shot == 3) {
+				System.out.println("오른쪽으로 공을 찼습니다.");
+				ball = 3;
+			} else if (shot == 4) {
+				System.out.println("게임 끝");
+				break;
+			}
+
+			if (computer == 1) {
+				System.out.println("골키퍼가 왼쪽으로 움직입니다.");
+			} else if (computer == 2) {
+				System.out.println("골키퍼가 가운데로 움직입니다.");
+			} else if (computer == 3) {
+				System.out.println("골키퍼가 오른쪽 움직입니다.");
+			}
+
+			if (shot == computer) {
+				System.out.println("아깝습니다.!! 골키퍼가 골을 막았습니다.");
+
+			} else {
+				System.out.println("골인입니다.");
+				mecount++;
+			}
+			
+			int ball2 = 0;
+			System.out.println("컴퓨터가 공을 찹니다. 어느 쪽으로 차겠습니까?");
+			System.out.println("왼쪽-1, 가운데-2, 오른쪽-3, 게임 끝-4 : ");
+
+			int shot2 = random.nextInt(3) + 1;
+			int me = scanner.nextInt();
+
+			if (shot2 == 1) {
+				System.out.println("왼쪽으로 공을 찼습니다.");
+				ball2 = 1;
+
+			} else if (shot2 == 2) {
+				System.out.println("가운데로 공을 찼습니다.");
+				ball2 = 2;
+			} else if (shot2 == 3) {
+				System.out.println("오른쪽으로 공을 찼습니다.");
+				ball2 = 3;
+			}
+			
+			if (me == 1) {
+				System.out.println("내가 왼쪽으로 움직입니다.");
+			} else if (me == 2) {
+				System.out.println("내가 가운데로 움직입니다.");
+			} else if (me == 3) {
+				System.out.println("내가 오른쪽 움직입니다.");
+			}
+
+			if (shot2 == me) {
+				System.out.println("내가 골을 막았습니다.");
+
+			} else {
+				System.out.println("아깝습니다.!! 골인입니다.");
+				comcount++;
+			}
+
+			// while문 안
+			// 나 한번 차고
+			// 컴퓨터 한번 찼어
+			// 근데 이걸 나한번 컴퓨터 한번을 총 10번해야 해. 나 5번, 컴퓨터5
+			
+			// 나머지 8번 돌리는 코드
+			// 그리고 10번 찼을 때 컴퓨터랑 나 승점 비교
+			// 근데 승점이 동일할 경우 승점이 1 차이가 날 때 까지 계속 반복
+			// 승점이 차이가 날 경우 while문 탈출
+		}
+
+		
+		// 승자가 있다는 거
+		scanner.close();
+
+		if (mecount > comcount) {
+			System.out.printf("나는 %d골, 컴퓨터는 %d골을 넣어 내가 이겼습니다.", mecount, comcount);	
+		} else if (comcount > mecount) {
+			System.out.printf("나는 %d골, 컴퓨터는 %d골을 넣어 컴퓨터가 이겼습니다.", mecount, comcount);
+		}
+		
+		System.out.println("게임을 종료합니다.");
+	}
+}
