@@ -1,0 +1,35 @@
+package zoombee;
+
+import java.util.Random;
+
+public class Hero {
+
+		Random random = new Random();
+		String name;
+		int pos;
+		int life;
+		
+		public Hero(String n, int p, int l) {
+			name= n;
+			pos = p;
+			life = l;
+		}
+		public void leftMove() {
+			pos = pos -1;
+			System.out.println(name+"이 왼쪽으로 이동하여 현재위치는"+ pos + "입니다.");
+			
+		}
+		
+		public void rightMove() {
+			pos = pos +1;
+			System.out.println(name+"이 오른쪽으로 이동하여 현재위치는"+ pos + "입니다.");
+			
+		}
+		public void jump() {
+			int a = random.nextInt(3)+1;
+			pos = pos + a;
+			System.out.println(name + "이" + a+"만큼 점프 했습니다. 현재 위치는"+pos+"입니다.");
+		}
+		
+		
+}
