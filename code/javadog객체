@@ -1,0 +1,16 @@
+package dog;
+
+public class dogtest {
+
+	public static void main(String[] args) {
+		dog d1 = new dog();
+		
+		d1.name = "돌돌이";
+		d1.age = 5;
+		
+		d1.bark();
+		d1.bite();
+
+	}
+
+}
