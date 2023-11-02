@@ -1,0 +1,16 @@
+import csv  #모듈 불러오기
+f = open('unit3.csv','r',encoding = 'utf-8')
+data = csv.reader(f)
+header = next(data)
+max_temp = -999
+max_date = ''
+for row in data:
+    if row[-1] == '':       #만약 데이터가 누락되었다면 최고의 기온을 -999로 저장
+        row[-1] = -999
+    row[-1] = float(row[-1])
+    if max_temp < row[0]: # 만약 지금까지 최고 기온보다 더 좊으면 업데이트
+        max_date = row[0]
+        max_temp = row[-1]
+f.close()
+print('기상 관측 이래 서울의 최고 기온이 가장 높았던 날은',max_date,'로',max_temp,'도 였습니다.')    #출력
+
