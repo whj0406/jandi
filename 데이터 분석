@@ -1,0 +1,42 @@
+
+from exam1117_function import get_file_to_lines
+
+file_name = '2023년 10월  교통카드 통계자료.csv'
+
+result = get_file_to_lines(file_name)
+result_header = result['header']
+result_data = result['data']
+
+
+
+
+
+
+
+#print(result_header)
+for line in result_data:
+    for i in range(4,8):
+        line[i] = int(line[i])
+
+max_type = ['유임승차', '유임하자', '무임승차','무임하차']
+type_len = len(max_type)
+max_val = [0] * type_len
+max_line = [''] * type_len
+max_name = [''] * type_len
+
+for data_row in result_data:
+   line = data_row[1]
+   name = data_row[3]
+   val = data_row[4:8]
+
+
+   for i in range(type_len):
+       if val[i] > max_val[i]:
+           max_val[i] = val[i]
+           max_line[i] = line
+           max_name[i] = name
+
+for i in range(type_len):
+    msg = '{} - {} - {} {:15,}'.format(max_type[i], max_line[i],max_name[i],max_val[i] )
+    msg2 = f'{max_type[i]} - {max_line[i]} - {max_name[i]} - {max_val[i]}'
+    print(msg)
