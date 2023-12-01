@@ -1,25 +1,16 @@
-package zombie;
+package Zombie;
 
-import java.util.Random;
-
-public class Zombie {
-	
-	
-	Random r = new Random();
-	String name;
-	int pos;
+public class Zombie extends Unit {
 	
 	public Zombie(String name, int pos) {
-		
-		this.name = name;
-		this.pos = pos;
-		
-		
+		super(name,pos);
 	}
-	
 	public void move() {
-		pos = pos + r.nextInt(3)-1;
-		if(pos<1) pos = 1;
-		System.out.println(name +"의 현재 위치는 " + pos + " 입니다.");
+		
+		int a = r.nextInt(3);
+		
+		if(a==0) left();
+		else if(a==1)right();
+		else System.out.println(name+"현재 위치는 "+pos + "입니다.");
 	}
 }
